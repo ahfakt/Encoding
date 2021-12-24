@@ -1,0 +1,46 @@
+cmake_minimum_required(VERSION 3.20.0)
+project(${PROJECT_NAME}_${Class} VERSION 0.1 DESCRIPTION "")
+
+
+set(DEPENDENCIES Stream Encoding)
+add_executable(${PROJECT_NAME}_Decode)
+target_include_directories(${PROJECT_NAME}_Decode PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/inc)
+target_sources(${PROJECT_NAME}_Decode PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/Decode.cpp)
+
+if (DEPENDENCIES)
+	foreach (T IN LISTS DEPENDENCIES)
+		if (NOT TARGET ${T})
+			if (T MATCHES "^Test_")
+				string(REPLACE "Test_" "" T T)
+				add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../../${T}/test ${CMAKE_CURRENT_BINARY_DIR}/../../../${T}/Testing)
+			else()
+				add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../../${T} ${CMAKE_CURRENT_BINARY_DIR}/../../../${T})
+			endif()
+		endif()
+	endforeach()
+	target_link_libraries(${PROJECT_NAME}_Decode PRIVATE ${DEPENDENCIES})
+endif (DEPENDENCIES)
+
+add_test(NAME ${PROJECT_NAME}_Decode COMMAND ${PROJECT_NAME}_Decode)
+
+
+set(DEPENDENCIES Stream Encoding)
+add_executable(${PROJECT_NAME}_Encode)
+target_include_directories(${PROJECT_NAME}_Encode PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/inc)
+target_sources(${PROJECT_NAME}_Encode PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/Encode.cpp)
+
+if (DEPENDENCIES)
+	foreach (T IN LISTS DEPENDENCIES)
+		if (NOT TARGET ${T})
+			if (T MATCHES "^Test_")
+				string(REPLACE "Test_" "" T T)
+				add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../../${T}/test ${CMAKE_CURRENT_BINARY_DIR}/../../../${T}/Testing)
+			else()
+				add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../../${T} ${CMAKE_CURRENT_BINARY_DIR}/../../../${T})
+			endif()
+		endif()
+	endforeach()
+	target_link_libraries(${PROJECT_NAME}_Encode PRIVATE ${DEPENDENCIES})
+endif (DEPENDENCIES)
+
+add_test(NAME ${PROJECT_NAME}_Encode COMMAND ${PROJECT_NAME}_Encode)

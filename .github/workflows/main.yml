@@ -1,0 +1,59 @@
+name: Create Doxygen Documentation
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install Packages
+        run: sudo apt-get update && sudo apt-get install -y doxygen graphviz
+
+      - name: Checkout MaJerle/doxygen-dark-theme
+        uses: actions/checkout@v4
+        with:
+          repository: MaJerle/doxygen-dark-theme
+          path: source/doxygen-dark-theme/
+
+      - name: Checkout ahfakt/Stream
+        uses: actions/checkout@v4
+        with:
+          repository: ahfakt/Stream
+          path: source/Stream/
+
+      - name: Checkout ahfakt/Encoding
+        uses: actions/checkout@v4
+        with:
+          path: source/${{ github.event.repository.name }}/
+
+      - name: Configure CMake
+        run: cmake -D 'CMAKE_BUILD_TYPE:STRING=Release' -S 'source/${{ github.event.repository.name }}/' -B 'build/${{ github.event.repository.name }}/'
+
+      - name: Build Documentation
+        run: cmake --build 'build/${{ github.event.repository.name }}/' --config Release --target Stream_Doc Encoding_Doc
+
+      - name: Upload static files as artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/${{ github.event.repository.name }}/doc/
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
